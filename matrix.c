@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include "matrix.h"
 
+/*
+ * Erstellt eine leere Matrix.
+ */
 static Matrix createEmptyMatrix(void)
 {
     Matrix matrix;
@@ -11,6 +14,9 @@ static Matrix createEmptyMatrix(void)
     return matrix;
 }
 
+/*
+ * Erstellt eine Matrix mit dynamischer Speicherverwaltung.
+ */
 Matrix createMatrix(int rows, int cols)
 {
     Matrix matrix = createEmptyMatrix();
@@ -22,16 +28,20 @@ Matrix createMatrix(int rows, int cols)
     matrix.rows = rows;
     matrix.cols = cols;
 
+    /* Speicher für Zeiger auf die Matrixzeilen reservieren */
     matrix.data = malloc(rows * sizeof(double *));
 
     if (matrix.data == NULL) {
         return createEmptyMatrix();
     }
 
+    /* Speicher für jede Zeile reservieren */
     for (int i = 0; i < rows; i++) {
         matrix.data[i] = calloc(cols, sizeof(double));
 
         if (matrix.data[i] == NULL) {
+
+            /* Bereits reservierten Speicher freigeben */
             for (int j = 0; j < i; j++) {
                 free(matrix.data[j]);
             }
@@ -44,6 +54,9 @@ Matrix createMatrix(int rows, int cols)
     return matrix;
 }
 
+/*
+ * Gibt den belegten Speicher einer Matrix frei.
+ */
 void freeMatrix(Matrix *matrix)
 {
     if (matrix == NULL || matrix->data == NULL) {
@@ -61,6 +74,9 @@ void freeMatrix(Matrix *matrix)
     matrix->data = NULL;
 }
 
+/*
+ * Addiert zwei Matrizen gleicher Dimension.
+ */
 Matrix addMatrices(Matrix a, Matrix b)
 {
     if (a.data == NULL || b.data == NULL ||
@@ -74,6 +90,7 @@ Matrix addMatrices(Matrix a, Matrix b)
         return result;
     }
 
+    /* Elemente beider Matrizen addieren */
     for (int i = 0; i < a.rows; i++) {
         for (int j = 0; j < a.cols; j++) {
             result.data[i][j] = a.data[i][j] + b.data[i][j];
@@ -83,6 +100,9 @@ Matrix addMatrices(Matrix a, Matrix b)
     return result;
 }
 
+/*
+ * Multipliziert zwei Matrizen.
+ */
 Matrix multiplyMatrices(Matrix a, Matrix b)
 {
     if (a.data == NULL || b.data == NULL || a.cols != b.rows) {
@@ -95,6 +115,7 @@ Matrix multiplyMatrices(Matrix a, Matrix b)
         return result;
     }
 
+    /* Matrixmultiplikation durchführen */
     for (int i = 0; i < result.rows; i++) {
         for (int j = 0; j < result.cols; j++) {
             for (int k = 0; k < a.cols; k++) {
@@ -106,6 +127,9 @@ Matrix multiplyMatrices(Matrix a, Matrix b)
     return result;
 }
 
+/*
+ * Erstellt die transponierte Matrix.
+ */
 Matrix transposeMatrix(Matrix matrix)
 {
     if (matrix.data == NULL) {
@@ -118,6 +142,7 @@ Matrix transposeMatrix(Matrix matrix)
         return result;
     }
 
+    /* Zeilen und Spalten vertauschen */
     for (int i = 0; i < matrix.rows; i++) {
         for (int j = 0; j < matrix.cols; j++) {
             result.data[j][i] = matrix.data[i][j];
