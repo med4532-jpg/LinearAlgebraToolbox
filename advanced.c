@@ -2,6 +2,9 @@
 #include <math.h>
 #include "advanced.h"
 
+/*
+ * Berechnet die Determinante einer 2×2-Matrix.
+ */
 double determinant2x2(Matrix matrix)
 {
     if (matrix.rows != 2 || matrix.cols != 2 || matrix.data == NULL)
@@ -13,6 +16,9 @@ double determinant2x2(Matrix matrix)
          - matrix.data[0][1] * matrix.data[1][0];
 }
 
+/*
+ * Bestimmt den Rang einer 2×2-Matrix.
+ */
 int rank2x2(Matrix matrix)
 {
     if (matrix.rows != 2 || matrix.cols != 2 || matrix.data == NULL)
@@ -38,6 +44,13 @@ int rank2x2(Matrix matrix)
     return 0;
 }
 
+/*
+ * Berechnet die Inverse einer 2×2-Matrix.
+ *
+ * Rückgabe:
+ *   1 bei erfolgreicher Berechnung,
+ *   0 falls keine Inverse existiert oder die Eingabe ungültig ist.
+ */
 int inverse2x2(Matrix matrix, Matrix *inverse)
 {
     if (matrix.rows != 2 || matrix.cols != 2 ||
@@ -53,6 +66,7 @@ int inverse2x2(Matrix matrix, Matrix *inverse)
         return 0;
     }
 
+    /* Ergebnismatrix erzeugen */
     *inverse = createMatrix(2, 2);
 
     if (inverse->rows != 2 ||
@@ -62,6 +76,7 @@ int inverse2x2(Matrix matrix, Matrix *inverse)
         return 0;
     }
 
+    /* Einträge der Inversen berechnen */
     inverse->data[0][0] =  matrix.data[1][1] / det;
     inverse->data[0][1] = -matrix.data[0][1] / det;
     inverse->data[1][0] = -matrix.data[1][0] / det;
@@ -70,6 +85,11 @@ int inverse2x2(Matrix matrix, Matrix *inverse)
     return 1;
 }
 
+/*
+ * Berechnet die Eigenwerte einer 2×2-Matrix.
+ *
+ * Komplexe Eigenwerte werden durch NAN dargestellt.
+ */
 void eigenvalues2x2(Matrix matrix, double *lambda1, double *lambda2)
 {
     if (matrix.rows != 2 || matrix.cols != 2 ||
@@ -85,6 +105,7 @@ void eigenvalues2x2(Matrix matrix, double *lambda1, double *lambda2)
     double c = matrix.data[1][0];
     double d = matrix.data[1][1];
 
+    /* Spur, Determinante und Diskriminante berechnen */
     double trace = a + d;
     double det = determinant2x2(matrix);
     double discriminant = trace * trace - 4.0 * det;
@@ -96,6 +117,7 @@ void eigenvalues2x2(Matrix matrix, double *lambda1, double *lambda2)
         return;
     }
 
+    /* Eigenwerte berechnen */
     *lambda1 = (trace + sqrt(discriminant)) / 2.0;
     *lambda2 = (trace - sqrt(discriminant)) / 2.0;
 }
