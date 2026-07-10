@@ -2,8 +2,12 @@
 #include <stdlib.h>
 #include "gauss.h"
 
+/*
+ * Löst ein lineares Gleichungssystem mit dem Gauß-Verfahren.
+ */
 int solveGauss(Matrix A, Matrix b, Matrix *solution)
 {
+    /* Eingaben prüfen */
     if (A.data == NULL || b.data == NULL || solution == NULL) {
         return 0;
     }
@@ -14,6 +18,7 @@ int solveGauss(Matrix A, Matrix b, Matrix *solution)
 
     int n = A.rows;
 
+    /* Arbeitskopien erzeugen */
     Matrix matrix = createMatrix(n, n);
     Matrix vector = createMatrix(n, 1);
 
@@ -23,6 +28,7 @@ int solveGauss(Matrix A, Matrix b, Matrix *solution)
         return 0;
     }
 
+    /* Matrix und Vektor kopieren */
     for (int i = 0; i < n; i++) {
         vector.data[i][0] = b.data[i][0];
 
@@ -31,8 +37,10 @@ int solveGauss(Matrix A, Matrix b, Matrix *solution)
         }
     }
 
+    /* Vorwärtselfimination */
     for (int i = 0; i < n; i++) {
 
+        /* Pivot bestimmen */
         int pivot = i;
 
         for (int j = i + 1; j < n; j++) {
@@ -47,6 +55,7 @@ int solveGauss(Matrix A, Matrix b, Matrix *solution)
             return 0;
         }
 
+        /* Zeilen bei Bedarf tauschen */
         if (pivot != i) {
 
             double *tempRow = matrix.data[i];
@@ -58,6 +67,7 @@ int solveGauss(Matrix A, Matrix b, Matrix *solution)
             vector.data[pivot][0] = tempValue;
         }
 
+        /* Einträge unterhalb des Pivots eliminieren */
         for (int j = i + 1; j < n; j++) {
 
             double factor = matrix.data[j][i] / matrix.data[i][i];
@@ -70,6 +80,7 @@ int solveGauss(Matrix A, Matrix b, Matrix *solution)
         }
     }
 
+    /* Lösungsvektor erzeugen */
     *solution = createMatrix(n, 1);
 
     if (solution->data == NULL) {
@@ -78,6 +89,7 @@ int solveGauss(Matrix A, Matrix b, Matrix *solution)
         return 0;
     }
 
+    /* Rückwärtseinsetzen */
     for (int i = n - 1; i >= 0; i--) {
 
         double sum = vector.data[i][0];
@@ -89,6 +101,7 @@ int solveGauss(Matrix A, Matrix b, Matrix *solution)
         solution->data[i][0] = sum / matrix.data[i][i];
     }
 
+    /* Temporären Speicher freigeben */
     freeMatrix(&matrix);
     freeMatrix(&vector);
 
