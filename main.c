@@ -15,6 +15,20 @@ int main(void){
     const char *tabNamen[TAB_COUNT] = {"Rechnen", "Determinante", "Inverse", "Rang", "Eigenwerte"};
 
     while(!WindowShouldClose()){
+        Vector2 mouse = GetMousePosition();
+        
+        if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+            for(int i = 0; i< TAB_COUNT; i++){
+                Rectangle r = {(float)(25+i*190), 65, 175, 38};
+                if(CheckCollisionPointRec(mouse, r)){
+                    aktuellerTab = (Tab)i;
+                }
+            }
+        }
+
+
+
+
         BeginDrawing();
 
         ClearBackground(RAYWHITE);
