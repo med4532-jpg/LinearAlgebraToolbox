@@ -1,3 +1,4 @@
+
 #ifndef MATRIX_H
 #define MATRIX_H
 
@@ -38,3 +39,7 @@ Matrix multiplyMatrices(Matrix a, Matrix b);
 Matrix transposeMatrix(Matrix matrix);
 
 #endif
+#endif
+
+
+
