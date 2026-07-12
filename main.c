@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "raylib.h"
 #include "drawMatrix.h"
+#include "ui_components.h"
 
 #define TAB_COUNT 5
 
@@ -23,8 +24,12 @@ int main(void){
         {3, 3, {{0}}}  // EIG
     };
 
+    //Die zweite Matrix für den Rechnen-Tab (Matrix B)
+    MatrixData matrixCalcB = {3, 3, {{0}}};
+
     //Wir starten beim Register "Rechnen"
     Tab aktuellerTab = CALC;
+    MatrixOp aktiveOperation = OP_NONE;
     const char *tabNamen[TAB_COUNT] = {"Rechnen", "Determinante", "Inverse", "Rang", "Eigenwerte"};
 
     while(!WindowShouldClose()){
@@ -38,7 +43,14 @@ int main(void){
                 }
             }
 
-            handleMatrixClick(&tabMatrizen[aktuellerTab], 50, 200, mouse);
+            if (aktuellerTab == CALC) {
+                // Im Rechnen-Tab prüfen wir BEIDE Matrizen (Matrix A links bei X: 50, Matrix B rechts bei X: 580)
+                handleMatrixClick(&tabMatrizen[CALC], 50, 200, mouse);
+                handleMatrixClick(&matrixCalcB, 580, 200, mouse);
+            } else {
+                // In allen anderen Tabs wird wie gewohnt nur die eine Standard-Matrix geklickt
+                handleMatrixClick(&tabMatrizen[aktuellerTab], 50, 200, mouse);
+            }
         }
         
         
@@ -49,11 +61,45 @@ int main(void){
         ClearBackground(RAYWHITE);
         
         ClearBackground((Color){243, 247, 252, 255});
-        // Dynamischen Titel für die Matrix generieren
-        char matrixTitel[64];
-        snprintf(matrixTitel, sizeof(matrixTitel), "Matrix für %s (Klicke Zelle zum Editieren)", tabNamen[aktuellerTab]);
+        if (aktuellerTab == CALC) {
+            // Im Rechnen-Tab zeichnen wir zwei Matrizen nebeneinander
+            drawMatrix(&tabMatrizen[CALC], 50, 200, "Matrix A", true);
+            drawMatrix(&matrixCalcB, 580, 200, "Matrix B", true);
 
-        drawMatrix(&tabMatrizen[aktuellerTab], 50, 200, matrixTitel, true);
+            
+            if (drawButton((Rectangle){250, 450, 150, 40}, "Addieren (+)", BLUE, (aktiveOperation == OP_ADD), mouse)) {
+                aktiveOperation = OP_ADD;
+                // Hier Logik für Addition ausführen
+            }
+            if (drawButton((Rectangle){420, 450, 170, 40}, "Subtrahieren (-)", ORANGE, (aktiveOperation == OP_SUB), mouse)) {
+                aktiveOperation = OP_SUB;
+                // Hier Logik für Subtraktion ausführen
+            }
+            if (drawButton((Rectangle){610, 450, 170, 40}, "Multiplizieren (x)", GREEN, (aktiveOperation == OP_MUL), mouse)) {
+                aktiveOperation = OP_MUL;
+                // Hier Logik für Multiplikation ausführen
+            }
+
+            if (drawButton((Rectangle){800, 450, 140, 40}, "Gauß", PURPLE, (aktiveOperation == OP_GAUSS), mouse)) {
+                aktiveOperation = OP_GAUSS;
+                
+            }
+             
+
+        } else {
+            // In allen anderen Tabs generieren wir den Standardtitel und zeichnen eine Matrix
+            char matrixTitel[64];
+            snprintf(matrixTitel, sizeof(matrixTitel), "Matrix für %s (Klicke Zelle zum Editieren)", tabNamen[aktuellerTab]);
+            drawMatrix(&tabMatrizen[aktuellerTab], 50, 200, matrixTitel, true);
+
+            char buttonText[64];
+            snprintf(buttonText, sizeof(buttonText), "%s berechnen", tabNamen[aktuellerTab]);
+            
+            if (drawButton((Rectangle){50, 450, 240, 40}, buttonText, DARKGRAY, false, mouse)) {
+                // Hier die jeweilige Berechnung (Det, Inv, Rank, Eig) triggern!
+                printf("%s wird berechnet...\n", tabNamen[aktuellerTab]);
+            }
+        }
 
         // Tabs zeichnen
         for (int i = 0; i < TAB_COUNT; i++) {
