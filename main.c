@@ -13,7 +13,7 @@ int main(void){
     InitWindow(1120,1100,"Linear Algebra ToolBox");
     SetTargetFPS(60);
 
-    MatrixData test = {3, 3, {{1,2,3},{4,5,6},{7,8,9}}};
+    MatrixData matrixA = {3, 3, {{0}}};
 
     //Wir starten beim Register "Rechnen"
     Tab aktuellerTab = CALC;
@@ -30,17 +30,20 @@ int main(void){
                 }
             }
         }
+        
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            // Prüfen, ob eine Zelle von Matrix A angeklickt wurde (Position X: 50, Y: 100)
+            handleMatrixClick(&matrixA, 50, 200, mouse);
+          
+        }
 
-
-
-
+        handleKeyboardInput();
         BeginDrawing();
 
         ClearBackground(RAYWHITE);
         
-
-        drawMatrix(&test, 35, 252, "Test Matrix");
-
+        ClearBackground((Color){243, 247, 252, 255});
+        drawMatrix(&matrixA, 50, 200, "Matrix A (Klicke Zelle zum Editieren)", true);
         // Tabs zeichnen
         for (int i = 0; i < TAB_COUNT; i++) {
             Rectangle r = {(float)(25 + i * 190), 65, 175, 38};
