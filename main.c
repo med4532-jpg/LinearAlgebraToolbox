@@ -1,6 +1,9 @@
 #include "raylib.h"
+#include "drawMatrix.h"
 
 #define TAB_COUNT 5
+
+
 
 //Unsere Tabs für die verschiedenen Anwendungen
 typedef enum {CALC, DET, INV, RANK, EIG} Tab;
@@ -9,6 +12,8 @@ int main(void){
 
     InitWindow(1120,1100,"Linear Algebra ToolBox");
     SetTargetFPS(60);
+
+    MatrixData test = {3, 3, {{1,2,3},{4,5,6},{7,8,9}}};
 
     //Wir starten beim Register "Rechnen"
     Tab aktuellerTab = CALC;
@@ -32,7 +37,10 @@ int main(void){
         BeginDrawing();
 
         ClearBackground(RAYWHITE);
-        DrawText("Hallo Matrix Editor!", 250, 280, 30, DARKBLUE);
+        
+
+        drawMatrix(&test, 35, 252, "Test Matrix");
+
         // Tabs zeichnen
         for (int i = 0; i < TAB_COUNT; i++) {
             Rectangle r = {(float)(25 + i * 190), 65, 175, 38};
