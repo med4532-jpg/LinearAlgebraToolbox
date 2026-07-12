@@ -39,7 +39,5 @@ Matrix multiplyMatrices(Matrix a, Matrix b);
 Matrix transposeMatrix(Matrix matrix);
 
 #endif
-#endif
-
 
 
