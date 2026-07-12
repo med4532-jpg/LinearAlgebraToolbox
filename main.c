@@ -79,6 +79,11 @@ int main(void){
                 aktiveOperation = OP_MUL;
                 // Hier Logik für Multiplikation ausführen
             }
+
+            if (drawButton((Rectangle){800, 450, 140, 40}, "Gauß", PURPLE, (aktiveOperation == OP_GAUSS), mouse)) {
+                aktiveOperation = OP_GAUSS;
+                
+            }
              
 
         } else {
