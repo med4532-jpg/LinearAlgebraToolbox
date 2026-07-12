@@ -1,6 +1,9 @@
 #include "raylib.h"
+#include "drawMatrix.h"
 
 #define TAB_COUNT 5
+
+
 
 //Unsere Tabs für die verschiedenen Anwendungen
 typedef enum {CALC, DET, INV, RANK, EIG} Tab;
@@ -9,6 +12,8 @@ int main(void){
 
     InitWindow(1120,1100,"Linear Algebra ToolBox");
     SetTargetFPS(60);
+
+    MatrixData matrixA = {3, 3, {{0}}};
 
     //Wir starten beim Register "Rechnen"
     Tab aktuellerTab = CALC;
@@ -25,14 +30,20 @@ int main(void){
                 }
             }
         }
+        
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            // Prüfen, ob eine Zelle von Matrix A angeklickt wurde (Position X: 50, Y: 100)
+            handleMatrixClick(&matrixA, 50, 200, mouse);
+          
+        }
 
-
-
-
+        handleKeyboardInput();
         BeginDrawing();
 
         ClearBackground(RAYWHITE);
-        DrawText("Hallo Matrix Editor!", 250, 280, 30, DARKBLUE);
+        
+        ClearBackground((Color){243, 247, 252, 255});
+        drawMatrix(&matrixA, 50, 200, "Matrix A (Klicke Zelle zum Editieren)", true);
         // Tabs zeichnen
         for (int i = 0; i < TAB_COUNT; i++) {
             Rectangle r = {(float)(25 + i * 190), 65, 175, 38};
