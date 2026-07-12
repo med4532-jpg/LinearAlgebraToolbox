@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "raylib.h"
 #include "drawMatrix.h"
 
@@ -13,7 +15,13 @@ int main(void){
     InitWindow(1120,1100,"Linear Algebra ToolBox");
     SetTargetFPS(60);
 
-    MatrixData matrixA = {3, 3, {{0}}};
+    MatrixData tabMatrizen[TAB_COUNT] = {
+        {3, 3, {{0}}}, // CALC
+        {3, 3, {{0}}}, // DET
+        {3, 3, {{0}}}, // INV
+        {3, 3, {{0}}}, // RANK
+        {3, 3, {{0}}}  // EIG
+    };
 
     //Wir starten beim Register "Rechnen"
     Tab aktuellerTab = CALC;
@@ -29,13 +37,11 @@ int main(void){
                     aktuellerTab = (Tab)i;
                 }
             }
+
+            handleMatrixClick(&tabMatrizen[aktuellerTab], 50, 200, mouse);
         }
         
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            // Prüfen, ob eine Zelle von Matrix A angeklickt wurde (Position X: 50, Y: 100)
-            handleMatrixClick(&matrixA, 50, 200, mouse);
-          
-        }
+        
 
         handleKeyboardInput();
         BeginDrawing();
@@ -43,7 +49,12 @@ int main(void){
         ClearBackground(RAYWHITE);
         
         ClearBackground((Color){243, 247, 252, 255});
-        drawMatrix(&matrixA, 50, 200, "Matrix A (Klicke Zelle zum Editieren)", true);
+        // Dynamischen Titel für die Matrix generieren
+        char matrixTitel[64];
+        snprintf(matrixTitel, sizeof(matrixTitel), "Matrix für %s (Klicke Zelle zum Editieren)", tabNamen[aktuellerTab]);
+
+        drawMatrix(&tabMatrizen[aktuellerTab], 50, 200, matrixTitel, true);
+
         // Tabs zeichnen
         for (int i = 0; i < TAB_COUNT; i++) {
             Rectangle r = {(float)(25 + i * 190), 65, 175, 38};

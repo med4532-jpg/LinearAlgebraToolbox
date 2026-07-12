@@ -44,6 +44,8 @@ void handleMatrixClick(MatrixData *m, int x, int y, Vector2 mousePos) {
 void handleKeyboardInput(void) {
     if (activeEditMatrix == NULL) return; // Keine Zelle aktiv -> nichts tun
 
+    bool bufferChanged = false;
+
     // Gedrücktes Zeichen holen (0 wenn keins)
     int key = GetCharPressed();
     while (key > 0) {
@@ -52,22 +54,22 @@ void handleKeyboardInput(void) {
             size_t len = strlen(editBuffer);
             editBuffer[len] = (char)key;
             editBuffer[len + 1] = '\0';
+            bufferChanged = true;
         }
         key = GetCharPressed(); // Nächstes Zeichen in der Warteschlange prüfen
     }
 
-    // Backspace zum Löschen
-    if (IsKeyPressed(KEY_BACKSPACE)) {
-        size_t len = strlen(editBuffer);
-        if (len > 0) editBuffer[len - 1] = '\0';
+    // WENN sich der Puffer geändert hat, schreiben wir den Wert SOFORT live in die Matrix
+    if (bufferChanged) {
+        // Falls der Puffer leer ist (z.B. alles gelöscht), setzen wir eine 0 an
+        if (strlen(editBuffer) == 0 || (strlen(editBuffer) == 1 && editBuffer[0] == '-')) {
+            activeEditMatrix->v[editRow][editCol] = 0.0f;
+        } else {
+            activeEditMatrix->v[editRow][editCol] = stringToFloat(editBuffer);
+        }
     }
 
-    // ENTER: Wert in die Matrix übernehmen
-    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)) {
-        activeEditMatrix->v[editRow][editCol] = stringToFloat(editBuffer);
-        activeEditMatrix = NULL; // Fokus verlieren
-        editRow = editCol = -1;
-    }
+    
 
     // ESCAPE: Abbrechen ohne zu speichern
     if (IsKeyPressed(KEY_ESCAPE)) {
