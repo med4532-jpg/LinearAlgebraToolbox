@@ -176,13 +176,15 @@ int main(void){
             snprintf(matrixTitel, sizeof(matrixTitel), "Matrix für %s (Klicke Zelle zum Editieren)", tabNamen[aktuellerTab]);
             drawMatrix(&tabMatrizen[aktuellerTab], 50, 200, matrixTitel, true);
 
-            char buttonText[64];
-            snprintf(buttonText, sizeof(buttonText), "%s berechnen", tabNamen[aktuellerTab]);
             
-            if (drawButton((Rectangle){50, 450, 240, 40}, buttonText, DARKGRAY, false, mouse)) {
+            
+            
+        }
+        if(aktuellerTab == DET){
+            if (drawButton((Rectangle){50, 400, 260, 40}, "Determinante berechnen", DARKGRAY, false, mouse)) {
                 // Hier die jeweilige Berechnung (Det, Inv, Rank, Eig) triggern!
                 printf("%s wird berechnet...\n", tabNamen[aktuellerTab]);
-
+    
                 MathMatrix m = UItoMath(&tabMatrizen[DET]);
                 
                 // 2. Funktion aus advanced.h berechnen
@@ -193,8 +195,10 @@ int main(void){
                 
                 // 4. Dynamischen Speicher der MathMatrix wieder freigeben
                 freeMatrix(&m);   
-            }
+            }    
         }
+        
+
         if (aktuellerTab == INV) {
             if (drawButton((Rectangle){50, 400, 260, 40}, "Inverse berechnen", DARKGRAY, false, mouse)) {
                 
