@@ -1,6 +1,6 @@
 #ifndef GAUSS_H
 #define GAUSS_H
-
+#include <math.h>
 #include "matrix.h"
 
 /*
