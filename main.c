@@ -185,7 +185,7 @@ int main(void){
 
                 MathMatrix m = UItoMath(&tabMatrizen[DET]);
                 
-                // 2. Deine mathematische Funktion aus advanced.h berechnen
+                // 2. Funktion aus advanced.h berechnen
                 double det = determinant2x2(m);
                 
                 // 3. Ergebnis in unseren Textpuffer schreiben
@@ -195,9 +195,36 @@ int main(void){
                 freeMatrix(&m);   
             }
         }
+        if (aktuellerTab == INV) {
+            if (drawButton((Rectangle){50, 400, 260, 40}, "Inverse berechnen", DARKGRAY, false, mouse)) {
+                
+                // 1. Eingabematrix in mathematisches Format konvertieren
+                MathMatrix m = UItoMath(&tabMatrizen[INV]);
+                MathMatrix mInv; // Hier speichert deine Funktion das Ergebnis hinein
+                
+                // 2. Deine mathematische Funktion aus advanced.h aufrufen
+                if (inverse2x2(m, &mInv)) {
+                    // Berechnung erfolgreich (Det != 0)
+                    MathToUI(mInv, &matrixCalcResult);
+                    zeigeErgebnisMatrix = true;
+                    //snprintf(ergebnisText, sizeof(ergebnisText), "Inverse erfolgreich berechnet!");
+                    freeMatrix(&mInv); // Speicher der erzeugten Ergebnis-Matrix freigeben
+                } else {
+                    // Fehlerfall (z. B. Determinante ist 0)
+                    zeigeErgebnisMatrix = false;
+                    snprintf(ergebnisText, sizeof(ergebnisText), "Fehler: Matrix ist singulär (Det = 0) -> Keine Inverse!");
+                }
+                
+                freeMatrix(&m); // Speicher der Eingabematrix freigeben
+            }
+        }
         // Ausgabe des Ergebnis
         if (ergebnisText[0] != '\0') {
             DrawText(ergebnisText, 50, 500, 24, MAROON);
+        }
+
+        if (aktuellerTab == INV && zeigeErgebnisMatrix) {
+            drawMatrix(&matrixCalcResult, 50, 510, "Invertierte Matrix A^-1", false);
         }
 
         // Tabs zeichnen
