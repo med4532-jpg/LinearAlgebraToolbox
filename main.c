@@ -15,7 +15,7 @@
 //Unsere Tabs für die verschiedenen Anwendungen
 typedef enum {CALC, DET, INV, RANK, EIG} Tab;
 
-// Konvertiert die UI-Matrix (float static) in die Mathe-Matrix (double dynamic)
+// Konvertiert die UI-Matrix in die Mathe-Matrix
 MathMatrix UItoMath(const MatrixData *src) {
     MathMatrix dest = createMatrix(src->rows, src->cols);
     if (dest.data != NULL) {
