@@ -6,7 +6,7 @@ typedef struct
 {
     int rows;
     int cols;
-    double **data;
+    double **data; /* Macht den Zeiger 2D*/
 } MathMatrix;
 
 /*
