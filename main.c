@@ -4,12 +4,40 @@
 #include "drawMatrix.h"
 #include "ui_components.h"
 
+#include "matrix.h"
+#include "advanced.h"
+#include "gauss.h"
+
 #define TAB_COUNT 5
 
 
 
 //Unsere Tabs für die verschiedenen Anwendungen
 typedef enum {CALC, DET, INV, RANK, EIG} Tab;
+
+// Konvertiert die UI-Matrix (float static) in die Mathe-Matrix (double dynamic)
+MathMatrix UItoMath(const MatrixData *src) {
+    MathMatrix dest = createMatrix(src->rows, src->cols);
+    if (dest.data != NULL) {
+        for (int r = 0; r < src->rows; r++) {
+            for (int c = 0; c < src->cols; c++) {
+                dest.data[r][c] = (double)src->v[r][c];
+            }
+        }
+    }
+    return dest;
+}
+
+// Konvertiert die Mathe-Matrix zurück in die UI-Matrix
+void MathToUI(MathMatrix src, MatrixData *dest) {
+    dest->rows = src.rows;
+    dest->cols = src.cols;
+    for (int r = 0; r < src.rows && r < MAX_DIM; r++) {
+        for (int c = 0; c < src.cols && c < MAX_DIM; c++) {
+            dest->v[r][c] = (float)src.data[r][c];
+        }
+    }
+}
 
 int main(void){
 
@@ -24,8 +52,14 @@ int main(void){
         {3, 3, {{0}}}  // EIG
     };
 
+    bool zeigeErgebnisMatrix = false;
+
+    // Puffer für Textausgaben (z.B. Determinante = 5)
+    char ergebnisText[128] = "";
     //Die zweite Matrix für den Rechnen-Tab (Matrix B)
     MatrixData matrixCalcB = {3, 3, {{0}}};
+
+    MatrixData matrixCalcResult = {3, 3, {{0}}};
 
     //Wir starten beim Register "Rechnen"
     Tab aktuellerTab = CALC;
@@ -40,6 +74,11 @@ int main(void){
                 Rectangle r = {(float)(25+i*190), 65, 175, 38};
                 if(CheckCollisionPointRec(mouse, r)){
                     aktuellerTab = (Tab)i;
+                    activeEditMatrix = NULL;
+                    editRow = editCol = -1;
+                    zeigeErgebnisMatrix = false;
+                    ergebnisText[0] = '\0';
+                    aktiveOperation = OP_NONE;
                 }
             }
 
@@ -69,20 +108,65 @@ int main(void){
             
             if (drawButton((Rectangle){250, 450, 150, 40}, "Addieren (+)", BLUE, (aktiveOperation == OP_ADD), mouse)) {
                 aktiveOperation = OP_ADD;
-                // Hier Logik für Addition ausführen
+                MathMatrix mA = UItoMath(&tabMatrizen[CALC]);
+                MathMatrix mB = UItoMath(&matrixCalcB);
+                
+                MathMatrix mRes = addMatrices(mA, mB); // Deine Funktion aus matrix.h!
+                
+                MathToUI(mRes, &matrixCalcResult);
+                zeigeErgebnisMatrix = true;
+                ergebnisText[0] = '\0';
+                
+                freeMatrix(&mA); freeMatrix(&mB); freeMatrix(&mRes);
             }
             if (drawButton((Rectangle){420, 450, 170, 40}, "Subtrahieren (-)", ORANGE, (aktiveOperation == OP_SUB), mouse)) {
                 aktiveOperation = OP_SUB;
-                // Hier Logik für Subtraktion ausführen
+                matrixCalcResult.rows = tabMatrizen[CALC].rows;
+                matrixCalcResult.cols = tabMatrizen[CALC].cols;
+                for(int r=0; r<matrixCalcResult.rows; r++) {
+                    for(int c=0; c<matrixCalcResult.cols; c++) {
+                        matrixCalcResult.v[r][c] = tabMatrizen[CALC].v[r][c] - matrixCalcB.v[r][c];
+                    }
+                }
+                zeigeErgebnisMatrix = true;
+                ergebnisText[0] = '\0';
             }
             if (drawButton((Rectangle){610, 450, 170, 40}, "Multiplizieren (x)", GREEN, (aktiveOperation == OP_MUL), mouse)) {
                 aktiveOperation = OP_MUL;
-                // Hier Logik für Multiplikation ausführen
+                MathMatrix mA = UItoMath(&tabMatrizen[CALC]);
+                MathMatrix mB = UItoMath(&matrixCalcB);
+                
+                MathMatrix mRes = multiplyMatrices(mA, mB); // Deine Funktion aus matrix.h!
+                
+                MathToUI(mRes, &matrixCalcResult);
+                zeigeErgebnisMatrix = true;
+                ergebnisText[0] = '\0';
+                
+                freeMatrix(&mA); freeMatrix(&mB); freeMatrix(&mRes);
             }
 
             if (drawButton((Rectangle){800, 450, 140, 40}, "Gauß", PURPLE, (aktiveOperation == OP_GAUSS), mouse)) {
                 aktiveOperation = OP_GAUSS;
+                MathMatrix mA = UItoMath(&tabMatrizen[CALC]);
+                MathMatrix mB = UItoMath(&matrixCalcB); 
+                MathMatrix mSol;
                 
+                // Deine Funktion aus gauss.h!
+                if (solveGauss(mA, mB, &mSol)) {
+                    MathToUI(mSol, &matrixCalcResult);
+                    zeigeErgebnisMatrix = true;
+                    snprintf(ergebnisText, sizeof(ergebnisText), "LGS erfolgreich gelöst!");
+                    freeMatrix(&mSol);
+                } else {
+                    zeigeErgebnisMatrix = false;
+                    snprintf(ergebnisText, sizeof(ergebnisText), "Fehler: System nicht lösbar oder Dimensionen inkompatibel (B muss Spaltenvektor sein!).");
+                }
+                freeMatrix(&mA); freeMatrix(&mB);
+            }
+                
+            // Ergebnismatrix unter den Knöpfen anzeigen (editable = false -> schreibgeschützt)
+            if (zeigeErgebnisMatrix) {
+                drawMatrix(&matrixCalcResult, 50, 540, "Ergebnis-Matrix", false);
             }
              
 

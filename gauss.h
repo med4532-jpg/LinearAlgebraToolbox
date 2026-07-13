@@ -10,6 +10,6 @@
  *   1 bei erfolgreicher Berechnung,
  *   0 falls das Gleichungssystem nicht lösbar ist oder die Eingabe ungültig ist.
  */
-int solveGauss(Matrix A, Matrix b, Matrix *solution);
+int solveGauss(MathMatrix A, MathMatrix b, MathMatrix *solution);
 
 #endif
