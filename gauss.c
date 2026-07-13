@@ -5,7 +5,7 @@
 /*
  * Löst ein lineares Gleichungssystem mit dem Gauß-Verfahren.
  */
-int solveGauss(MathMatrix A, MathMatrix b, MathMatrix *solution)
+int solveGauss(Matrix A, Matrix b, Matrix *solution)
 {
     /* Eingaben prüfen */
     if (A.data == NULL || b.data == NULL || solution == NULL) {
@@ -19,8 +19,8 @@ int solveGauss(MathMatrix A, MathMatrix b, MathMatrix *solution)
     int n = A.rows;
 
     /* Arbeitskopien erzeugen */
-    MathMatrix matrix = createMatrix(n, n);
-    MathMatrix vector = createMatrix(n, 1);
+    Matrix matrix = createMatrix(n, n);
+    Matrix vector = createMatrix(n, 1);
 
     if (matrix.data == NULL || vector.data == NULL) {
         freeMatrix(&matrix);

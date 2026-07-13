@@ -5,7 +5,7 @@
 /*
  * Berechnet die Determinante einer 2×2-Matrix.
  */
-double determinant2x2(MathMatrix matrix)
+double determinant2x2(Matrix matrix)
 {
     if (matrix.rows != 2 || matrix.cols != 2 || matrix.data == NULL)
     {
@@ -19,7 +19,7 @@ double determinant2x2(MathMatrix matrix)
 /*
  * Bestimmt den Rang einer 2×2-Matrix.
  */
-int rank2x2(MathMatrix matrix)
+int rank2x2(Matrix matrix)
 {
     if (matrix.rows != 2 || matrix.cols != 2 || matrix.data == NULL)
     {
@@ -51,7 +51,7 @@ int rank2x2(MathMatrix matrix)
  *   1 bei erfolgreicher Berechnung,
  *   0 falls keine Inverse existiert oder die Eingabe ungültig ist.
  */
-int inverse2x2(MathMatrix matrix, MathMatrix *inverse)
+int inverse2x2(Matrix matrix, Matrix *inverse)
 {
     if (matrix.rows != 2 || matrix.cols != 2 ||
         matrix.data == NULL || inverse == NULL)
@@ -90,7 +90,7 @@ int inverse2x2(MathMatrix matrix, MathMatrix *inverse)
  *
  * Komplexe Eigenwerte werden durch NAN dargestellt.
  */
-void eigenvalues2x2(MathMatrix matrix, double *lambda1, double *lambda2)
+void eigenvalues2x2(Matrix matrix, double *lambda1, double *lambda2)
 {
     if (matrix.rows != 2 || matrix.cols != 2 ||
         matrix.data == NULL ||
