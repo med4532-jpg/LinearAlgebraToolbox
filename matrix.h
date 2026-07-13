@@ -7,7 +7,7 @@ typedef struct
     int rows;
     int cols;
     double **data;
-} Matrix;
+} MathMatrix;
 
 /*
  * Erstellt eine Matrix mit dynamischer Speicherverwaltung.
@@ -16,27 +16,27 @@ typedef struct
  *   Matrix mit rows Zeilen und cols Spalten.
  *   Bei ungültigen Dimensionen oder Speicherfehler wird eine leere Matrix zurückgegeben.
  */
-Matrix createMatrix(int rows, int cols);
+MathMatrix createMatrix(int rows, int cols);
 
 /*
  * Gibt den dynamisch belegten Speicher einer Matrix frei.
  */
-void freeMatrix(Matrix *matrix);
+void freeMatrix(MathMatrix *matrix);
 
 /*
  * Addiert zwei Matrizen gleicher Dimension.
  */
-Matrix addMatrices(Matrix a, Matrix b);
+MathMatrix addMatrices(MathMatrix a, MathMatrix b);
 
 /*
  * Multipliziert zwei Matrizen, falls die Dimensionen kompatibel sind.
  */
-Matrix multiplyMatrices(Matrix a, Matrix b);
+MathMatrix multiplyMatrices(MathMatrix a, MathMatrix b);
 
 /*
  * Erstellt die transponierte Matrix.
  */
-Matrix transposeMatrix(Matrix matrix);
+MathMatrix transposeMatrix(MathMatrix matrix);
 
 #endif
 

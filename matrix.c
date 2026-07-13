@@ -5,9 +5,9 @@
 /*
  * Erstellt eine leere Matrix.
  */
-static Matrix createEmptyMatrix(void)
+static MathMatrix createEmptyMatrix(void)
 {
-    Matrix matrix;
+    MathMatrix matrix;
     matrix.rows = 0;
     matrix.cols = 0;
     matrix.data = NULL;
@@ -17,9 +17,9 @@ static Matrix createEmptyMatrix(void)
 /*
  * Erstellt eine Matrix mit dynamischer Speicherverwaltung.
  */
-Matrix createMatrix(int rows, int cols)
+MathMatrix createMatrix(int rows, int cols)
 {
-    Matrix matrix = createEmptyMatrix();
+    MathMatrix matrix = createEmptyMatrix();
 
     if (rows <= 0 || cols <= 0) {
         return matrix;
@@ -57,7 +57,7 @@ Matrix createMatrix(int rows, int cols)
 /*
  * Gibt den belegten Speicher einer Matrix frei.
  */
-void freeMatrix(Matrix *matrix)
+void freeMatrix(MathMatrix *matrix)
 {
     if (matrix == NULL || matrix->data == NULL) {
         return;
@@ -77,14 +77,14 @@ void freeMatrix(Matrix *matrix)
 /*
  * Addiert zwei Matrizen gleicher Dimension.
  */
-Matrix addMatrices(Matrix a, Matrix b)
+MathMatrix addMatrices(MathMatrix a, MathMatrix b)
 {
     if (a.data == NULL || b.data == NULL ||
         a.rows != b.rows || a.cols != b.cols) {
         return createEmptyMatrix();
     }
 
-    Matrix result = createMatrix(a.rows, a.cols);
+    MathMatrix result = createMatrix(a.rows, a.cols);
 
     if (result.data == NULL) {
         return result;
@@ -103,13 +103,13 @@ Matrix addMatrices(Matrix a, Matrix b)
 /*
  * Multipliziert zwei Matrizen.
  */
-Matrix multiplyMatrices(Matrix a, Matrix b)
+MathMatrix multiplyMatrices(MathMatrix a, MathMatrix b)
 {
     if (a.data == NULL || b.data == NULL || a.cols != b.rows) {
         return createEmptyMatrix();
     }
 
-    Matrix result = createMatrix(a.rows, b.cols);
+    MathMatrix result = createMatrix(a.rows, b.cols);
 
     if (result.data == NULL) {
         return result;
@@ -130,13 +130,13 @@ Matrix multiplyMatrices(Matrix a, Matrix b)
 /*
  * Erstellt die transponierte Matrix.
  */
-Matrix transposeMatrix(Matrix matrix)
+MathMatrix transposeMatrix(MathMatrix matrix)
 {
     if (matrix.data == NULL) {
         return createEmptyMatrix();
     }
 
-    Matrix result = createMatrix(matrix.cols, matrix.rows);
+    MathMatrix result = createMatrix(matrix.cols, matrix.rows);
 
     if (result.data == NULL) {
         return result;
