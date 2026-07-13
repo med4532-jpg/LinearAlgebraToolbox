@@ -227,6 +227,22 @@ int main(void){
                 freeMatrix(&m);
             }
         }
+
+        if (aktuellerTab == EIG) {
+            if (drawButton((Rectangle){50, 400, 260, 40}, "Eigenwerte berechnen", DARKGRAY, false, mouse)) {              
+                MathMatrix m = UItoMath(&tabMatrizen[EIG]);              
+                double l1 = 0.0;
+                double l2 = 0.0;              
+                eigenvalues2x2(m, &l1, &l2);               
+                //Prüfen, ob die Eigenwerte komplex sind (werden als NAN zurückgegeben)
+                if (isnan(l1) || isnan(l2)) {
+                    snprintf(ergebnisText, sizeof(ergebnisText), "Eigenwerte: Keine reellen Eigenwerte vorhanden (komplex).");
+                } else {
+                    snprintf(ergebnisText, sizeof(ergebnisText), "Eigenwerte: lambda_1 = %g, lambda_2 = %g", l1, l2);
+                }
+                freeMatrix(&m);
+            }
+        }
         // Ausgabe des Ergebnis
         if (ergebnisText[0] != '\0') {
             DrawText(ergebnisText, 50, 500, 24, MAROON);
