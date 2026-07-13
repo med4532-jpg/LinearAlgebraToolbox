@@ -46,10 +46,10 @@ int main(void){
 
     MatrixData tabMatrizen[TAB_COUNT] = {
         {3, 3, {{0}}}, // CALC
-        {3, 3, {{0}}}, // DET
-        {3, 3, {{0}}}, // INV
-        {3, 3, {{0}}}, // RANK
-        {3, 3, {{0}}}  // EIG
+        {2, 2, {{0}}}, // DET
+        {2, 2, {{0}}}, // INV
+        {2, 2, {{0}}}, // RANK
+        {2, 2, {{0}}}  // EIG
     };
 
     bool zeigeErgebnisMatrix = false;
@@ -111,7 +111,7 @@ int main(void){
                 MathMatrix mA = UItoMath(&tabMatrizen[CALC]);
                 MathMatrix mB = UItoMath(&matrixCalcB);
                 
-                MathMatrix mRes = addMatrices(mA, mB); // Deine Funktion aus matrix.h!
+                MathMatrix mRes = addMatrices(mA, mB); // Deine Funktion aus matrix.h (Ori & Nik)!
                 
                 MathToUI(mRes, &matrixCalcResult);
                 zeigeErgebnisMatrix = true;
@@ -136,7 +136,7 @@ int main(void){
                 MathMatrix mA = UItoMath(&tabMatrizen[CALC]);
                 MathMatrix mB = UItoMath(&matrixCalcB);
                 
-                MathMatrix mRes = multiplyMatrices(mA, mB); // Deine Funktion aus matrix.h!
+                MathMatrix mRes = multiplyMatrices(mA, mB); // Deine Funktion aus matrix.h! (Ori & Nik)
                 
                 MathToUI(mRes, &matrixCalcResult);
                 zeigeErgebnisMatrix = true;
@@ -151,7 +151,7 @@ int main(void){
                 MathMatrix mB = UItoMath(&matrixCalcB); 
                 MathMatrix mSol;
                 
-                // Deine Funktion aus gauss.h!
+                // Deine Funktion aus gauss.h (Ori oder Nik)
                 if (solveGauss(mA, mB, &mSol)) {
                     MathToUI(mSol, &matrixCalcResult);
                     zeigeErgebnisMatrix = true;
@@ -182,7 +182,22 @@ int main(void){
             if (drawButton((Rectangle){50, 450, 240, 40}, buttonText, DARKGRAY, false, mouse)) {
                 // Hier die jeweilige Berechnung (Det, Inv, Rank, Eig) triggern!
                 printf("%s wird berechnet...\n", tabNamen[aktuellerTab]);
+
+                MathMatrix m = UItoMath(&tabMatrizen[DET]);
+                
+                // 2. Deine mathematische Funktion aus advanced.h berechnen
+                double det = determinant2x2(m);
+                
+                // 3. Ergebnis in unseren Textpuffer schreiben
+                snprintf(ergebnisText, sizeof(ergebnisText), "Determinante = %g", det);
+                
+                // 4. Dynamischen Speicher der MathMatrix wieder freigeben
+                freeMatrix(&m);   
             }
+        }
+        // Ausgabe des Ergebnis
+        if (ergebnisText[0] != '\0') {
+            DrawText(ergebnisText, 50, 500, 24, MAROON);
         }
 
         // Tabs zeichnen
