@@ -202,12 +202,12 @@ int main(void){
                 MathMatrix m = UItoMath(&tabMatrizen[INV]);
                 MathMatrix mInv; // Hier speichert deine Funktion das Ergebnis hinein
                 
-                // 2. Deine mathematische Funktion aus advanced.h aufrufen
+                
                 if (inverse2x2(m, &mInv)) {
                     // Berechnung erfolgreich (Det != 0)
                     MathToUI(mInv, &matrixCalcResult);
                     zeigeErgebnisMatrix = true;
-                    //snprintf(ergebnisText, sizeof(ergebnisText), "Inverse erfolgreich berechnet!");
+                    snprintf(ergebnisText, sizeof(ergebnisText), "Inverse erfolgreich berechnet!");
                     freeMatrix(&mInv); // Speicher der erzeugten Ergebnis-Matrix freigeben
                 } else {
                     // Fehlerfall (z. B. Determinante ist 0)
@@ -216,6 +216,15 @@ int main(void){
                 }
                 
                 freeMatrix(&m); // Speicher der Eingabematrix freigeben
+            }
+        }
+        //Verbindung zwischen RANK und Button
+        if (aktuellerTab == RANK) {
+            if (drawButton((Rectangle){50, 400, 260, 40}, "Rang berechnen", DARKGRAY, false, mouse)) {               
+                MathMatrix m = UItoMath(&tabMatrizen[RANK]);
+                int rang = rank2x2(m);              
+                snprintf(ergebnisText, sizeof(ergebnisText), "Rang der Matrix = %d", rang);
+                freeMatrix(&m);
             }
         }
         // Ausgabe des Ergebnis
