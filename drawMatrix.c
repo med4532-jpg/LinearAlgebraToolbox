@@ -47,43 +47,32 @@ void handleKeyboardInput(void) {
     bool bufferChanged = false;
     size_t len = strlen(editBuffer);
 
-    // --- 1. SONDERFALL: MINUS PHYSISCH ABFANGEN (Sehr wichtig für deutsche Tastaturen/Nummernblock) ---
-    // Wenn das Feld leer ist (len == 0), erlauben wir das Minuszeichen
-    if (len == 0) {
-        if (IsKeyPressed(KEY_MINUS) || IsKeyPressed(KEY_KP_SUBTRACT)) {
-            editBuffer[0] = '-';
-            editBuffer[1] = '\0';
-            len = 1;
-            bufferChanged = true;
-        }
-    }
-
-    // --- 2. NORMALE ZEICHENEINGABE (Zahlen, Punkte, Kommas) ---
+    // eintippen
     int key = GetCharPressed();
     while (key > 0) {
-        // Erlaube Ziffern (0-9), Dezimalpunkt und Komma
+        // Erlaube Ziffern (0-9), Dezimalpunkt, Komma
         bool isNumberOrDot = (key >= '0' && key <= '9') || key == '.' || key == ',';
         
-        // Falls GetCharPressed das Minus doch erkennt, lassen wir es nur am Start (len == 0) zu
+        // Erlaube das Minuszeichen NUR, wenn das Feld noch komplett leer ist (Index 0)
         bool isMinusAtStart = (key == '-' && len == 0);
 
         if ((isNumberOrDot || isMinusAtStart) && len < sizeof(editBuffer) - 1) {
             editBuffer[len] = (char)key;
             editBuffer[len + 1] = '\0';
-            len++;
+            len++; // Länge aktualisieren für den nächsten Schleifendurchlauf
             bufferChanged = true;
         }
-        key = GetCharPressed(); // Nächstes Zeichen in der Warteschlange prüfen
+        key = GetCharPressed(); // Nächstes Zeichen prüfen
     }
 
-    // --- 3. LÖSCHEN (BACKSPACE-TASTE) ---
+    //  löschen nun möglich
     if (IsKeyPressed(KEY_BACKSPACE) && len > 0) {
         editBuffer[len - 1] = '\0';
         len--;
         bufferChanged = true;
     }
 
-    // --- 4. MATRIX LIVE AKTUALISIEREN ---
+    // matrix aktualsieren
     if (bufferChanged) {
         // Wenn das Feld leer ist oder nur ein einsames Minus dasteht, setzen wir den Wert auf 0
         if (len == 0 || (len == 1 && editBuffer[0] == '-')) {
@@ -93,8 +82,8 @@ void handleKeyboardInput(void) {
         }
     }
 
-    // ENTER oder ESCAPE: Bearbeitung beenden / deselektieren
-    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) || IsKeyPressed(KEY_ESCAPE)) {
+    // ESCAPE: Bearbeitung abbrechen und deselektieren
+    if (IsKeyPressed(KEY_ESCAPE)) {
         activeEditMatrix = NULL;
         editRow = editCol = -1;
     }

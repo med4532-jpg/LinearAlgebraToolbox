@@ -1,0 +1,12 @@
+# Matrix A
+2 2
+1 3 
+2 4 
+# Matrix B
+2 2
+5 7 
+6 8 
+# Ergebnis-Matrix
+2 2
+6 10 
+8 12 
