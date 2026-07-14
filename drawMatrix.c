@@ -45,34 +45,56 @@ void handleKeyboardInput(void) {
     if (activeEditMatrix == NULL) return; // Keine Zelle aktiv -> nichts tun
 
     bool bufferChanged = false;
+    size_t len = strlen(editBuffer);
 
-    // Gedrücktes Zeichen holen (0 wenn keins)
+    // --- 1. SONDERFALL: MINUS PHYSISCH ABFANGEN (Sehr wichtig für deutsche Tastaturen/Nummernblock) ---
+    // Wenn das Feld leer ist (len == 0), erlauben wir das Minuszeichen
+    if (len == 0) {
+        if (IsKeyPressed(KEY_MINUS) || IsKeyPressed(KEY_KP_SUBTRACT)) {
+            editBuffer[0] = '-';
+            editBuffer[1] = '\0';
+            len = 1;
+            bufferChanged = true;
+        }
+    }
+
+    // --- 2. NORMALE ZEICHENEINGABE (Zahlen, Punkte, Kommas) ---
     int key = GetCharPressed();
     while (key > 0) {
-        // Nur Zahlen, Minus, Punkt und Komma erlauben
-        if (((key >= '0' && key <= '9') || key == '-' || key == '.' || key == ',') && strlen(editBuffer) < sizeof(editBuffer) - 1) {
-            size_t len = strlen(editBuffer);
+        // Erlaube Ziffern (0-9), Dezimalpunkt und Komma
+        bool isNumberOrDot = (key >= '0' && key <= '9') || key == '.' || key == ',';
+        
+        // Falls GetCharPressed das Minus doch erkennt, lassen wir es nur am Start (len == 0) zu
+        bool isMinusAtStart = (key == '-' && len == 0);
+
+        if ((isNumberOrDot || isMinusAtStart) && len < sizeof(editBuffer) - 1) {
             editBuffer[len] = (char)key;
             editBuffer[len + 1] = '\0';
+            len++;
             bufferChanged = true;
         }
         key = GetCharPressed(); // Nächstes Zeichen in der Warteschlange prüfen
     }
 
-    // WENN sich der Puffer geändert hat, schreiben wir den Wert SOFORT live in die Matrix
+    // --- 3. LÖSCHEN (BACKSPACE-TASTE) ---
+    if (IsKeyPressed(KEY_BACKSPACE) && len > 0) {
+        editBuffer[len - 1] = '\0';
+        len--;
+        bufferChanged = true;
+    }
+
+    // --- 4. MATRIX LIVE AKTUALISIEREN ---
     if (bufferChanged) {
-        // Falls der Puffer leer ist (z.B. alles gelöscht), setzen wir eine 0 an
-        if (strlen(editBuffer) == 0 || (strlen(editBuffer) == 1 && editBuffer[0] == '-')) {
+        // Wenn das Feld leer ist oder nur ein einsames Minus dasteht, setzen wir den Wert auf 0
+        if (len == 0 || (len == 1 && editBuffer[0] == '-')) {
             activeEditMatrix->v[editRow][editCol] = 0.0f;
         } else {
             activeEditMatrix->v[editRow][editCol] = stringToFloat(editBuffer);
         }
     }
 
-    
-
-    // ESCAPE: Abbrechen ohne zu speichern
-    if (IsKeyPressed(KEY_ESCAPE)) {
+    // ENTER oder ESCAPE: Bearbeitung beenden / deselektieren
+    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER) || IsKeyPressed(KEY_ESCAPE)) {
         activeEditMatrix = NULL;
         editRow = editCol = -1;
     }
