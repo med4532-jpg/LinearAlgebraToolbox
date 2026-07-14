@@ -45,33 +45,44 @@ void handleKeyboardInput(void) {
     if (activeEditMatrix == NULL) return; // Keine Zelle aktiv -> nichts tun
 
     bool bufferChanged = false;
+    size_t len = strlen(editBuffer);
 
-    // Gedrücktes Zeichen holen (0 wenn keins)
+    // eintippen
     int key = GetCharPressed();
     while (key > 0) {
-        // Nur Zahlen, Minus, Punkt und Komma erlauben
-        if (((key >= '0' && key <= '9') || key == '-' || key == '.' || key == ',') && strlen(editBuffer) < sizeof(editBuffer) - 1) {
-            size_t len = strlen(editBuffer);
+        // Erlaube Ziffern (0-9), Dezimalpunkt, Komma
+        bool isNumberOrDot = (key >= '0' && key <= '9') || key == '.' || key == ',';
+        
+        // Erlaube das Minuszeichen NUR, wenn das Feld noch komplett leer ist (Index 0)
+        bool isMinusAtStart = (key == '-' && len == 0);
+
+        if ((isNumberOrDot || isMinusAtStart) && len < sizeof(editBuffer) - 1) {
             editBuffer[len] = (char)key;
             editBuffer[len + 1] = '\0';
+            len++; // Länge aktualisieren für den nächsten Schleifendurchlauf
             bufferChanged = true;
         }
-        key = GetCharPressed(); // Nächstes Zeichen in der Warteschlange prüfen
+        key = GetCharPressed(); // Nächstes Zeichen prüfen
     }
 
-    // WENN sich der Puffer geändert hat, schreiben wir den Wert SOFORT live in die Matrix
+    //  löschen nun möglich
+    if (IsKeyPressed(KEY_BACKSPACE) && len > 0) {
+        editBuffer[len - 1] = '\0';
+        len--;
+        bufferChanged = true;
+    }
+
+    // matrix aktualsieren
     if (bufferChanged) {
-        // Falls der Puffer leer ist (z.B. alles gelöscht), setzen wir eine 0 an
-        if (strlen(editBuffer) == 0 || (strlen(editBuffer) == 1 && editBuffer[0] == '-')) {
+        // Wenn das Feld leer ist oder nur ein einsames Minus dasteht, setzen wir den Wert auf 0
+        if (len == 0 || (len == 1 && editBuffer[0] == '-')) {
             activeEditMatrix->v[editRow][editCol] = 0.0f;
         } else {
             activeEditMatrix->v[editRow][editCol] = stringToFloat(editBuffer);
         }
     }
 
-    
-
-    // ESCAPE: Abbrechen ohne zu speichern
+    // ESCAPE: Bearbeitung abbrechen und deselektieren
     if (IsKeyPressed(KEY_ESCAPE)) {
         activeEditMatrix = NULL;
         editRow = editCol = -1;

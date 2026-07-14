@@ -48,6 +48,98 @@ void clearMatrixData(MatrixData *matrix) {
     }
 }
 
+static void writeMatrixToFile(FILE *f, const char *label, const MatrixData *m) {
+    fprintf(f, "# %s\n", label);
+    fprintf(f, "%d %d\n", m->rows, m->cols);
+    for (int r = 0; r < m->rows; r++) {
+        for (int c = 0; c < m->cols; c++) {
+            fprintf(f, "%g ", (double)m->v[r][c]);
+        }
+        fprintf(f, "\n");
+    }
+}
+
+
+static bool readMatrixFromFile(FILE *f, MatrixData *m) {
+    char line[256];
+ 
+    do {
+        if (!fgets(line, sizeof(line), f)) return false;
+    } while (line[0] == '#' || line[0] == '\n' || line[0] == '\r');
+ 
+    int rows, cols;
+    if (sscanf(line, "%d %d", &rows, &cols) != 2) return false;
+ 
+    if (rows < 1) rows = 1;
+    if (rows > MAX_DIM) rows = MAX_DIM;
+    if (cols < 1) cols = 1;
+    if (cols > MAX_DIM) cols = MAX_DIM;
+ 
+    m->rows = rows;
+    m->cols = cols;
+ 
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            if (fscanf(f, "%f", &m->v[r][c]) != 1) return false;
+        }
+    }
+    // Rest der letzten Zeilenumbrüche konsumieren, bevor die nächste Matrix gelesen wird
+    int ch;
+    while ((ch = fgetc(f)) != '\n' && ch != EOF) { }
+ 
+    return true;
+}
+
+
+static void baueDateiname(char *out, size_t outSize, const char *tabName) {
+    snprintf(out, outSize, "daten_%s.txt", tabName);
+}
+
+
+static bool speichereDaten(const char *dateiname, Tab tab, MatrixData tabMatrizen[], MatrixData *matrixCalcB, MatrixData *matrixGaussB, MatrixData *matrixCalcResult, bool zeigeErgebnisMatrix, const char *ergebnisText) {
+    FILE *f = fopen(dateiname, "w");
+    if (!f) return false;
+ 
+    if (tab == CALC) {
+        writeMatrixToFile(f, "Matrix A", &tabMatrizen[CALC]);
+        writeMatrixToFile(f, "Matrix B", matrixCalcB);
+    } else if (tab == GAUSS) {
+        writeMatrixToFile(f, "Koeffizientenmatrix A", &tabMatrizen[GAUSS]);
+        writeMatrixToFile(f, "Vektor b", matrixGaussB);
+    } else {
+        writeMatrixToFile(f, "Matrix", &tabMatrizen[tab]);
+    }
+ 
+    if (zeigeErgebnisMatrix) {
+        writeMatrixToFile(f, "Ergebnis-Matrix", matrixCalcResult);
+    }
+    if (ergebnisText != NULL && ergebnisText[0] != '\0') {
+        fprintf(f, "# Ergebnistext\n%s\n", ergebnisText);
+    }
+ 
+    fclose(f);
+    return true;
+}
+static bool ladeDaten(const char *dateiname, Tab tab, MatrixData tabMatrizen[], MatrixData *matrixCalcB, MatrixData *matrixGaussB) {
+    FILE *f = fopen(dateiname, "r");
+    if (!f) return false;
+ 
+    bool ok = true;
+    if (tab == CALC) {
+        ok = readMatrixFromFile(f, &tabMatrizen[CALC]) && ok;
+        ok = readMatrixFromFile(f, matrixCalcB) && ok;
+    } else if (tab == GAUSS) {
+        ok = readMatrixFromFile(f, &tabMatrizen[GAUSS]) && ok;
+        ok = readMatrixFromFile(f, matrixGaussB) && ok;
+    } else {
+        ok = readMatrixFromFile(f, &tabMatrizen[tab]) && ok;
+    }
+ 
+    fclose(f);
+    return ok;
+}
+
+
 
 
 int main(void){
@@ -65,6 +157,8 @@ int main(void){
     };
 
     bool zeigeErgebnisMatrix = false;
+
+    char dateiStatus[160] = "";
 
     // Puffer für Textausgaben (z.B. Determinante = 5)
     char ergebnisText[128] = "";
@@ -325,6 +419,38 @@ int main(void){
             // Nach dem Leeren setzen wir das berechnete Ergebnis zurück
             zeigeErgebnisMatrix = false;
             ergebnisText[0] = '\0';
+            dateiStatus[0] = '\0';   // wird beim Leeren mit zurückgesetzt
+        }
+
+        if (drawButton((Rectangle){920, 170, 150, 35}, "Öffnen", DARKGREEN, false, mouse)) {
+            char dateiname[64];
+            baueDateiname(dateiname, sizeof(dateiname), tabNamen[aktuellerTab]);
+ 
+            if (ladeDaten(dateiname, aktuellerTab, tabMatrizen, &matrixCalcB, &matrixGaussB)) {
+                snprintf(dateiStatus, sizeof(dateiStatus), "Geladen aus %s", dateiname);
+                // Nach dem Laden ein evtl. altes Ergebnis ausblenden, da es nicht mehr zu den neuen Werten passt
+                zeigeErgebnisMatrix = false;
+                ergebnisText[0] = '\0';
+            } else {
+                snprintf(dateiStatus, sizeof(dateiStatus), "Fehler: %s konnte nicht gelesen werden!", dateiname);
+            }
+        }
+ 
+        // "Speichern"-Button: schreibt Eingabematrizen + aktuelles Ergebnis des Tabs in eine Datei
+        if (drawButton((Rectangle){920, 215, 150, 35}, "Speichern", DARKGREEN, false, mouse)) {
+            char dateiname[64];
+            baueDateiname(dateiname, sizeof(dateiname), tabNamen[aktuellerTab]);
+ 
+            if (speichereDaten(dateiname, aktuellerTab, tabMatrizen, &matrixCalcB, &matrixGaussB, &matrixCalcResult, zeigeErgebnisMatrix, ergebnisText)) {
+                snprintf(dateiStatus, sizeof(dateiStatus), "Gespeichert in %s", dateiname);
+            } else {
+                snprintf(dateiStatus, sizeof(dateiStatus), "Fehler: %s konnte nicht geschrieben werden!", dateiname);
+            }
+        }
+ 
+        // Statusmeldung zu Öffnen/Speichern anzeigen
+        if (dateiStatus[0] != '\0') {
+            DrawText(dateiStatus, 920, 255, 16, DARKGRAY);
         }
 
         EndDrawing();
