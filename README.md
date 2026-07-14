@@ -1,4 +1,4 @@
-# 🧮 Interactive Matrix Toolbox (C & Raylib)
+# 🧮 Interactive Linear Algebra Toolbox (C & Raylib)
  
 Eine interaktive Desktop-Anwendung zur Arbeit mit **Matrizen und Vektoren**, entwickelt in **reinem C** und visualisiert mit der **Raylib**-Grafikbibliothek. Das Tool bietet eine benutzerfreundliche Oberfläche zur Eingabe, Bearbeitung und Echtzeit-Berechnung komplexer linearer Algebra-Probleme.
  
