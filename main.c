@@ -8,12 +8,12 @@
 #include "advanced.h"
 #include "gauss.h"
 
-#define TAB_COUNT 5
+#define TAB_COUNT 6
 
 
 
 //Unsere Tabs für die verschiedenen Anwendungen
-typedef enum {CALC, DET, INV, RANK, EIG} Tab;
+typedef enum {CALC, DET, INV, RANK, EIG, GAUSS} Tab;
 
 // Konvertiert die UI-Matrix in die Mathe-Matrix
 MathMatrix UItoMath(const MatrixData *src) {
@@ -39,6 +39,8 @@ void MathToUI(MathMatrix src, MatrixData *dest) {
     }
 }
 
+
+
 int main(void){
 
     InitWindow(1120,1100,"Linear Algebra ToolBox");
@@ -49,7 +51,8 @@ int main(void){
         {2, 2, {{0}}}, // DET
         {2, 2, {{0}}}, // INV
         {2, 2, {{0}}}, // RANK
-        {2, 2, {{0}}}  // EIG
+        {2, 2, {{0}}},  // EIG
+        {3, 3, {{0}}}  // GAUSS
     };
 
     bool zeigeErgebnisMatrix = false;
@@ -58,13 +61,13 @@ int main(void){
     char ergebnisText[128] = "";
     //Die zweite Matrix für den Rechnen-Tab (Matrix B)
     MatrixData matrixCalcB = {3, 3, {{0}}};
-
+    MatrixData matrixGaussB = {3,1,{{0}}}; //3x1 Spaltenvektor
     MatrixData matrixCalcResult = {3, 3, {{0}}};
 
     //Wir starten beim Register "Rechnen"
     Tab aktuellerTab = CALC;
     MatrixOp aktiveOperation = OP_NONE;
-    const char *tabNamen[TAB_COUNT] = {"Rechnen", "Determinante", "Inverse", "Rang", "Eigenwerte"};
+    const char *tabNamen[TAB_COUNT] = {"Rechnen", "Determinante", "Inverse", "Rang", "Eigenwerte", "Gauss"};
 
     while(!WindowShouldClose()){
         Vector2 mouse = GetMousePosition();
@@ -86,7 +89,12 @@ int main(void){
                 // Im Rechnen-Tab prüfen wir BEIDE Matrizen (Matrix A links bei X: 50, Matrix B rechts bei X: 580)
                 handleMatrixClick(&tabMatrizen[CALC], 50, 200, mouse);
                 handleMatrixClick(&matrixCalcB, 580, 200, mouse);
-            } else {
+            } 
+            else if (aktuellerTab == GAUSS) {
+                //Im Gauß-Tab prüfen wir Koeffizientenmatrix A und Vektor b
+                handleMatrixClick(&tabMatrizen[GAUSS], 50, 200, mouse);
+                handleMatrixClick(&matrixGaussB, 580, 200, mouse);
+            }else {
                 // In allen anderen Tabs wird wie gewohnt nur die eine Standard-Matrix geklickt
                 handleMatrixClick(&tabMatrizen[aktuellerTab], 50, 200, mouse);
             }
@@ -104,7 +112,7 @@ int main(void){
             // Im Rechnen-Tab zeichnen wir zwei Matrizen nebeneinander
             drawMatrix(&tabMatrizen[CALC], 50, 200, "Matrix A", true);
             drawMatrix(&matrixCalcB, 580, 200, "Matrix B", true);
-
+      
             
             if (drawButton((Rectangle){250, 450, 150, 40}, "Addieren (+)", BLUE, (aktiveOperation == OP_ADD), mouse)) {
                 aktiveOperation = OP_ADD;
@@ -145,24 +153,7 @@ int main(void){
                 freeMatrix(&mA); freeMatrix(&mB); freeMatrix(&mRes);
             }
 
-            if (drawButton((Rectangle){800, 450, 140, 40}, "Gauß", PURPLE, (aktiveOperation == OP_GAUSS), mouse)) {
-                aktiveOperation = OP_GAUSS;
-                MathMatrix mA = UItoMath(&tabMatrizen[CALC]);
-                MathMatrix mB = UItoMath(&matrixCalcB); 
-                MathMatrix mSol;
-                
-                // Deine Funktion aus gauss.h (Ori oder Nik)
-                if (solveGauss(mA, mB, &mSol)) {
-                    MathToUI(mSol, &matrixCalcResult);
-                    zeigeErgebnisMatrix = true;
-                    snprintf(ergebnisText, sizeof(ergebnisText), "LGS erfolgreich gelöst!");
-                    freeMatrix(&mSol);
-                } else {
-                    zeigeErgebnisMatrix = false;
-                    snprintf(ergebnisText, sizeof(ergebnisText), "Fehler: System nicht lösbar oder Dimensionen inkompatibel (B muss Spaltenvektor sein!).");
-                }
-                freeMatrix(&mA); freeMatrix(&mB);
-            }
+            
                 
             // Ergebnismatrix unter den Knöpfen anzeigen (editable = false -> schreibgeschützt)
             if (zeigeErgebnisMatrix) {
@@ -171,11 +162,15 @@ int main(void){
              
 
         } else {
+            if (aktuellerTab == GAUSS) {
+                drawMatrix(&tabMatrizen[GAUSS], 50, 200, "Koeffizientenmatrix A", true);
+                drawMatrix(&matrixGaussB, 580, 200, "Vektor b", true);
+            } else{
             // In allen anderen Tabs generieren wir den Standardtitel und zeichnen eine Matrix
             char matrixTitel[64];
             snprintf(matrixTitel, sizeof(matrixTitel), "Matrix für %s (Klicke Zelle zum Editieren)", tabNamen[aktuellerTab]);
             drawMatrix(&tabMatrizen[aktuellerTab], 50, 200, matrixTitel, true);
-
+            }        
             
             
             
@@ -247,6 +242,29 @@ int main(void){
                 freeMatrix(&m);
             }
         }
+
+        if (aktuellerTab == GAUSS) {
+            if (drawButton((Rectangle){50, 450, 260, 40}, "LGS lösen (Gauß)", DARKGRAY, false, mouse)) {
+                
+                // 1. Matrizen in das mathematische Format konvertieren
+                MathMatrix mA = UItoMath(&tabMatrizen[GAUSS]);
+                MathMatrix mB = UItoMath(&matrixGaussB); 
+                MathMatrix mSol;
+                
+                // 2. lösen
+                if (solveGauss(mA, mB, &mSol)) {
+                    MathToUI(mSol, &matrixCalcResult);
+                    zeigeErgebnisMatrix = true;
+                    snprintf(ergebnisText, sizeof(ergebnisText), "LGS erfolgreich gelöst!");
+                    freeMatrix(&mSol);
+                } else {
+                    zeigeErgebnisMatrix = false;
+                    snprintf(ergebnisText, sizeof(ergebnisText), "Fehler: System nicht lösbar oder Dimensionen inkompatibel!");
+                }
+                freeMatrix(&mA); freeMatrix(&mB);
+            }
+        }
+
         // Ausgabe des Ergebnis
         if (ergebnisText[0] != '\0') {
             DrawText(ergebnisText, 50, 500, 24, MAROON);
@@ -255,6 +273,12 @@ int main(void){
         if (aktuellerTab == INV && zeigeErgebnisMatrix) {
             drawMatrix(&matrixCalcResult, 50, 510, "Invertierte Matrix A^-1", false);
         }
+
+       
+        if (aktuellerTab == GAUSS && zeigeErgebnisMatrix) {
+            drawMatrix(&matrixCalcResult, 50, 530, " ", false);
+        }
+           
 
         // Tabs zeichnen
         for (int i = 0; i < TAB_COUNT; i++) {
@@ -272,6 +296,7 @@ int main(void){
         if (aktuellerTab == INV) DrawText("Modus: Inverse", 35, 130, 20, DARKGRAY);
         if (aktuellerTab == RANK) DrawText("Modus: Rang", 35, 130, 20, DARKGRAY);
         if (aktuellerTab == EIG) DrawText("Modus: Eigenwerte", 35, 130, 20, DARKGRAY);
+        if (aktuellerTab == GAUSS) DrawText("Modus: Gauß-Verfahren", 35, 130, 20, DARKGRAY);
         
         EndDrawing();
 
