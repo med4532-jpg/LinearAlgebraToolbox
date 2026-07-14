@@ -217,6 +217,30 @@ int main(void){
             drawMatrix(&matrixCalcB, 580, 200, "Matrix B", true);
       
             
+            if (drawButton((Rectangle){800, 450, 170, 40}, "Transponieren (T)", PURPLE, false, mouse)) {
+                
+                //Matrix A aus dem UI holen, transponieren und wieder zurückschreiben
+                MathMatrix mA = UItoMath(&tabMatrizen[CALC]);
+                MathMatrix mATrans = transposeMatrix(mA); // Ruft deine Funktion aus matrix.c auf!
+                MathToUI(mATrans, &tabMatrizen[CALC]);
+                
+                //Matrix B aus dem UI holen, transponieren und wieder zurückschreiben
+                MathMatrix mB = UItoMath(&matrixCalcB);
+                MathMatrix mBTrans = transposeMatrix(mB); // Ruft deine Funktion aus matrix.c auf!
+                MathToUI(mBTrans, &matrixCalcB);
+                
+                //Dynamisch belegten Speicher der temporären Matrizen sauber freigeben
+                freeMatrix(&mA);
+                freeMatrix(&mATrans);
+                freeMatrix(&mB);
+                freeMatrix(&mBTrans);
+                
+                //Ein eventuell noch angezeigtes altes Rechenergebnis ausblenden
+                zeigeErgebnisMatrix = false;
+                ergebnisText[0] = '\0';
+            }
+
+
             if (drawButton((Rectangle){250, 450, 150, 40}, "Addieren (+)", BLUE, (aktiveOperation == OP_ADD), mouse)) {
                 aktiveOperation = OP_ADD;
                 MathMatrix mA = UItoMath(&tabMatrizen[CALC]);
