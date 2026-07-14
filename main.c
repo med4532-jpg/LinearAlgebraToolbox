@@ -39,6 +39,15 @@ void MathToUI(MathMatrix src, MatrixData *dest) {
     }
 }
 
+// Hilfsfunktion: Setzt alle Werte einer Matrix auf 0 zurück
+void clearMatrixData(MatrixData *matrix) {
+    for (int r = 0; r < MAX_DIM; r++) {
+        for (int c = 0; c < MAX_DIM; c++) {
+            matrix->v[r][c] = 0.0f;
+        }
+    }
+}
+
 
 
 int main(void){
@@ -298,6 +307,26 @@ int main(void){
         if (aktuellerTab == EIG) DrawText("Modus: Eigenwerte", 35, 130, 20, DARKGRAY);
         if (aktuellerTab == GAUSS) DrawText("Modus: Gauß-Verfahren", 35, 130, 20, DARKGRAY);
         
+
+        if (drawButton((Rectangle){920, 125, 150, 35}, "Matrix leeren", MAROON, false, mouse)) {
+            // Je nachdem welcher Tab aktiv ist leeren wir die dazugehörigen Matrizen
+            if (aktuellerTab == CALC) {
+                clearMatrixData(&tabMatrizen[CALC]);
+                clearMatrixData(&matrixCalcB);
+                clearMatrixData(&matrixCalcResult);
+            } else if (aktuellerTab == GAUSS) {
+                clearMatrixData(&tabMatrizen[GAUSS]);
+                clearMatrixData(&matrixGaussB);
+                clearMatrixData(&matrixCalcResult);
+            } else {
+                clearMatrixData(&tabMatrizen[aktuellerTab]);
+            }
+            
+            // Nach dem Leeren setzen wir das berechnete Ergebnis zurück
+            zeigeErgebnisMatrix = false;
+            ergebnisText[0] = '\0';
+        }
+
         EndDrawing();
 
     }
